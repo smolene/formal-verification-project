@@ -1,0 +1,31 @@
+
+type Nat {
+  case z()
+  case s(Nat)
+}
+
+// from section 3.7
+def plus(x: Nat, y: Nat): Nat = {
+    x match {
+        case z() => y
+        case s(x1) => s(plus(x1, y))
+    }
+}
+
+// from section 2
+def add: Nat -> Nat -> Nat = {
+    \x: Nat. \y: Nat. x match {
+        case z() => y
+        case s(x1) => s(add(x1, y))
+    }
+}
+
+def times4(x: Nat): Nat = {
+    let xtimes2: Nat = add(x, x) in
+    add(xtimes2, xtimes2)
+}
+
+def times4desugared(x: Nat): Nat = {
+    (\xtimes2: Nat. add(xtimes2, xtimes2))(add(x, x))
+}
+

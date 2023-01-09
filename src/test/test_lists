@@ -1,0 +1,192 @@
+#lang datalog
+
+typed(X,T) :- lambda(X,V,B), typed(V,Tv), typed(B,Tb), fun(Tfn,Tv1,Tb1), type_eq(T, Tfn), type_eq(Tv,Tv1), type_eq(Tb,Tb1).
+typed(X,T) :- app(X,E1,E2), typed(E1,Te), fun(Te1,T1,T), typed(E2,T11), type_eq(Te,Te1), type_eq(T1,T11).
+typed(X,T) :- match(X,S,P,B), typed(S,T1), typed(P,T11), typed(B,T), type_eq(T1,T11).
+typed(X,T) :- pattern_match_list(X,E1,E2), typed(E1,T), typed(E2,T1), type_eq(T,T1).
+typed(X,T) :- forall_intro(X,E1,A), typed(E1,T1), type_gen(T,A,T11), type_eq(T1,T11).
+typed(X,T) :- forall_elim(X,E,A,U), typed(E,T1), type_gen(T1,A,T2), replace(T,U,A,T2).
+
+
+type(T) :- fun(T,T1,T2), type(T1), type(T2).
+type(T) :- forall_intro(E,E1,T).
+
+type_eq(T,U) :- type(T), T=U.
+type_eq(T,U) :- type_eq(U,T).
+type_eq(T,U) :- type_eq(T,S), type_eq(S,U).
+type_eq(T,U) :- fun(T,T1,T2), fun(U,U1,U2), type_eq(T1,U1), type_eq(T2,U2).
+type_eq(T,U) :- type_gen(T,A,T1), type_gen(U,B,U1), type_eq(T1,U1).
+
+replace(T,U,A,T1) :- type_eq(A,T1), type(U), T=U.
+replace(T,U,A,T1) :- type_eq(A,T1), type_eq(T,U).
+replace(T,U,A,T1) :- simple_type(T1), T=T1, type(U), type(A).
+replace(T,U,A,T1) :- fun(T1,T2,T3), replace(R2,U,A,T2), replace(R3,U,A,T3), fun(T,R2,R3).
+replace(T,U,A,T1) :- type_gen(T1,B,T2), replace(R2,U,A,T2), type_gen(T,B,R2).
+
+fun(X,Tv,Tb) :- lambda(X,V,B), typed(V,Tv), typed(B,Tb).
+
+typeconstr(X,T) :- match(E,S,X,B), typed(S,T).
+
+
+
+
+type(bool).
+simple_type(bool).
+typed(E,bool) :- tru(E).
+typed(E,bool) :- fls(E).
+
+type(nat).
+simple_type(nat).
+typed(E,nat) :- z(E).
+typed(E,nat) :- succ(E,E1), typed(E1,nat).
+typeconstr(X,nat) :- succ(E,X).
+
+type(T) :- type(A), list(T,A).
+typed(E,T) :- nil(E,A), list(T,A).
+typed(E,T) :- cons(E,Elm,List), typed(Elm,A), typed(List,T), list(T,A).
+replace(T,U,A,T1) :- list(T1,T2), replace(R2,U,A,T2), list(T,R2).
+typeconstr(X,T) :- cons(E,X,XS), typeconstr(E,T1), list(T1,T).
+typeconstr(XS,T) :- cons(E,X,XS), typeconstr(E,T).
+
+
+
+list(listnat,nat).
+list(listbool,bool).
+fun(funnatnat,nat,nat).
+fun(funboolnat,bool,nat).
+fun(funnatbool, nat,bool).
+fun(funboolbool,bool,bool).
+
+
+
+z(zero).
+succ(one,zero).
+tru(_true).
+fls(_false).
+
+nil(nil_bool,bool).
+cons(true_nil,_true,nil_bool).
+cons(false_true_nil,_false,true_nil).
+
+nil(nil_nat,nat).
+cons(zero_nil,zero,nil_nat).
+cons(one_zero_nil,one,zero_nil).
+
+
+
+
+simple_type(t).
+simple_type(u).
+list(lt,t).
+list(lu,u).
+fun(t_u,t,u).
+var(ls).
+typed(ls,lt).
+var(f).
+typed(f,t_u).
+nil(_nil1,T):- type(T).
+nil(_nil2,T):- type(T).
+match(_match1,ls,_nil2,_nil1).
+cons(_cons1,vh,vt).
+var(vh).
+var(vt).
+typed(vh,T) :- typeconstr(vh,T).
+typed(vt,T):- typeconstr(vt,T).
+app(_app1,f,vh).
+app(_app2,map_ascribed,f).
+app(_app3,_app2,vt).
+cons(_cons2,_app1,_app3).
+match(_match2,ls,_cons1,_cons2).
+pattern_match_list(_patmatch1,_match1,_match2).
+lambda(_map1,ls,_patmatch1).
+lambda(_map,f,_map1).
+fun(lt_lu,lt,lu).
+fun(_t_u__lt_lu,t_u,lt_lu).
+forall_intro(map_forall1,_map,t).
+forall_intro(map_forall2,map_forall1,u).
+type_gen(tg,t,T) :- typed(_map,T).
+type_gen(ug,u,T) :- typed(map_forall1,T).
+typed(map_ascribed,_t_u__lt_lu).
+
+
+
+var(x).
+typed(x,bool).
+match(m_1,x,_true,one).
+match(m_2,x,_false,zero).
+pattern_match_list(p_m_1,m_1,m_2).
+lambda(f1,x,p_m_1).
+
+
+forall_elim(map_t_nat,map_forall2,u,nat).
+forall_elim(map_bool_nat,map_t_nat,t,bool).
+app(app_map1,map_bool_nat,f1).
+app(app_map_bool_nat,app_map1,false_true_nil).
+
+fun(funltlnat,lt,listnat).
+fun(funlboollnat,listbool,listnat).
+fun(funtnat, t, nat).
+fun(funtl2nat, funtnat, funltlnat).
+fun(funtl2boolnat, funboolnat, funlboollnat).
+type_gen(tpttgnat, t, funtl2nat).
+type_gen(tpboolnat, u, funtl2boolnat).
+
+
+
+
+
+var(y).
+typed(y,nat).
+var(k).
+typed(k,T) :- typeconstr(k,T).
+succ(sk,k).
+match(m_3,y,sk,_true).
+match(m_4,y,zero,_false).
+pattern_match_list(p_m_2,m_3,m_4).
+lambda(f2,y,p_m_2).
+
+
+forall_elim(map_t_bool,map_forall2,u,bool).
+forall_elim(map_nat_bool,map_t_bool,t,nat).
+app(app_map2,map_nat_bool,f2).
+app(app_map_nat_bool,app_map2,one_zero_nil).
+
+fun(funltlbool,lt,listbool).
+fun(funlnatlbool,listnat,listbool).
+fun(funtbool, t, bool).
+fun(funtl2bool, funtbool, funltlbool).
+fun(funtl2natbool, funnatbool, funlnatlbool).
+type_gen(tpttgbool, t, funtl2bool).
+type_gen(tpnatbool, u, funtl2natbool).
+
+
+
+
+
+
+typed(_match1,T)?
+typed(vh,T)?
+typed(_cons1,T)?
+typed(_app1,T)?
+typed(_app2,T)?
+typed(_app3,T)?
+typed(_cons2,T)?
+typed(_match2,T)?
+typed(_patmatch1,T)?
+typed(_map1,T)?
+typed(_map,T)?
+typed(map_forall1,T)?
+typed(map_forall2,T)?
+
+
+typed(f1,T)?
+
+
+typed(app_map_bool_nat,T)?
+
+
+
+typed(f2,T)?
+
+
+typed(app_map_nat_bool,T)?

@@ -1,0 +1,47 @@
+//.input app
+//.input var
+.output typed
+
+.decl var(x:symbol)
+.decl app(x:symbol,f:symbol,e:symbol)
+.decl lambda(l:symbol,v:symbol,b:symbol)
+//.decl case(m:symbol,s:symbol,p:symbol,b:symbol)
+//.decl pattern_match_list(p:symbol,a:symbol,b:symbol)
+
+.decl term(x:symbol)
+.decl type(t:symbol)
+.decl typed(x:symbol,t:symbol)
+.decl fun(a:symbol,b:symbol)
+
+typed(X,T) :- 
+    app(X,F,E), lambda(F,V,B), 
+    typed(E,Tev), typed(V,Tev)
+    typed(B,T). 
+
+typed(X,T) :-
+    lambda(X,V,B), 
+
+eval(X) :- var(X).
+eval(X) :- 
+    app(X,F,E), lambda()
+
+
+
+//type(A,B) :- type(unit,A), type(unit,B).
+//
+//typed(X,A,B) :-
+//    app(X,F,E),
+//    typed(F,Fa,Fb), typed(E,unit,Eb),
+
+
+//.decl fun(f:symbol,a:symbol,b:symbol)
+//.decl type_eq(a:symbol,b:symbol) eqrel
+//.decl fun(a:symbol,b:symbol)
+//fun(A,B) :- type(A), type(B).
+//type(T) :- fun(T,_).
+//type(T) :- fun(_,T).
+//
+//typed(X,T) :-
+//    app(X,F,A),
+//    typed(F,Tf)
+

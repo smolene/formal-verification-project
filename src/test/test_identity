@@ -1,0 +1,80 @@
+#lang datalog
+
+typed(X,T) :- lambda(X,V,B), typed(V,Tv), typed(B,Tb), fun(Tfn,Tv1,Tb1), type_eq(T, Tfn), type_eq(Tv,Tv1), type_eq(Tb,Tb1).
+typed(X,T) :- app(X,E1,E2), typed(E1,Te), fun(Te1,T1,T), typed(E2,T11), type_eq(Te,Te1), type_eq(T1,T11).
+typed(X,T) :- match(X,S,P,B), typed(S,T1), typed(P,T11), typed(B,T), type_eq(T1,T11).
+typed(X,T) :- pattern_match_list(X,E1,E2), typed(E1,T), typed(E2,T1), type_eq(T,T1).
+typed(X,T) :- forall_intro(X,E1,A), typed(E1,T1), type_gen(T,A,T11), type_eq(T1,T11).
+typed(X,T) :- forall_elim(X,E,A,U), typed(E,T1), type_gen(T1,A,T2), replace(T,U,A,T2).
+
+
+type(T) :- fun(T,T1,T2), type(T1), type(T2).
+type(T) :- forall_intro(E,E1,T).
+
+type_eq(T,U) :- type(T), T=U.
+type_eq(T,U) :- type_eq(U,T).
+type_eq(T,U) :- type_eq(T,S), type_eq(S,U).
+type_eq(T,U) :- fun(T,T1,T2), fun(U,U1,U2), type_eq(T1,U1), type_eq(T2,U2).
+type_eq(T,U) :- type_gen(T,A,T1), type_gen(U,B,U1), type_eq(T1,U1).
+
+replace(T,U,A,T1) :- type_eq(A,T1), type(U), T=U.
+replace(T,U,A,T1) :- type_eq(A,T1), type_eq(T,U).
+replace(T,U,A,T1) :- simple_type(T1), T=T1, type(U), type(A).
+replace(T,U,A,T1) :- fun(T1,T2,T3), replace(R2,U,A,T2), replace(R3,U,A,T3), fun(T,R2,R3).
+replace(T,U,A,T1) :- type_gen(T1,B,T2), replace(R2,U,A,T2), type_gen(T,B,R2).
+
+fun(X,Tv,Tb) :- lambda(X,V,B), typed(V,Tv), typed(B,Tb).
+
+typeconstr(X,T) :- match(E,S,X,B), typed(S,T).
+
+
+
+type(bool).
+simple_type(bool).
+typed(E,bool) :- tru(E).
+typed(E,bool) :- fls(E).
+
+type(nat).
+simple_type(nat).
+typed(E,nat) :- z(E).
+typed(E,nat) :- succ(E,E1), typed(E1,nat).
+typeconstr(X,nat) :- succ(E,X).
+
+fun(funnatnat,nat,nat).
+fun(funboolnat,bool,nat).
+fun(funnatbool, nat,bool).
+fun(funboolbool,bool,bool).
+
+z(zero).
+succ(one,zero).
+tru(_true).
+fls(_false).
+
+var(x).
+typed(x,t).
+fun(t_t,t,t).
+lambda(id,x,x).
+forall_intro(forall_id,id,t).
+type_gen(id_type,t,t_t). 
+
+
+forall_elim(id_nat,forall_id,t,T) :- typed(zero,T).
+app(id_zero,id_nat,zero).
+
+
+forall_elim(id_bool,forall_id,t,T) :- typed(_true,T).
+app(id_true,id_bool,_true).
+
+typed(zero,T)?
+typed(one,T)?
+typed(_true,T)?
+typed(_false,T)?
+
+typed(x,T)?
+typed(id,T)?
+typed(forall_id,T)?
+typed(id_bool,T)?
+typed(id_nat,T)?
+
+typed(id_zero,T)?
+typed(id_true,T)?

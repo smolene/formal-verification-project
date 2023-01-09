@@ -1,0 +1,109 @@
+
+type Bool {
+  case true()
+  case false()
+}
+
+type Nat {
+  case z()
+  case s(Nat)
+}
+
+type List {
+    case nil()
+    case cons(Nat, List)
+}
+
+type Tree {
+    case leaf(Nat)
+    case branch(Tree, Nat, Tree)
+}
+
+def plus(x: Nat, y: Nat): Nat = {
+    x match {
+        case z() => y
+        case s(x1) => s(plus(x1, y))
+    }
+}
+
+def mul(a: Nat, b: Nat): Nat = {
+    a match {
+        case z() => z()
+        case s(a1) => plus(b, mul(a1, b))
+    }
+}
+
+def map(f: Nat -> Nat, ls: List): List = {
+    ls match {
+        case nil() => nil()
+        case cons(h, t) => cons(f(h), map(f, t))
+    }
+}
+
+def id(x: Bool): Bool = {
+    x
+}
+
+def callsPlus2(y: Nat): Nat = {
+    s(plus2(y))
+}
+
+def plus2(x: Nat): Nat = {
+    s(s(x))
+}
+
+def plus1(x: Nat): Nat = {
+    s(x)
+}
+
+def usesNumber1(z: Nat): Nat = {
+    s(number1)
+}
+
+def number1: Nat = {
+    s(z())
+}
+
+def inf(x: Nat): Nat = {
+    s(inf(x))
+}
+
+def rec(x: Nat): Nat = {
+    rec(x)
+}
+
+def recfix(self: Nat -> Nat, x: Nat): Nat = {
+    self(x)
+}
+
+def toBool(x: Nat): Bool = {
+    x match {
+        case z() => false()
+        case s(_) => true()
+    }
+}
+
+def pred(x: Nat): Nat = {
+    x match {
+        case z() => z()
+        case s(y) => y
+    }
+}
+
+// Functions from the report:
+
+def add: Nat -> Nat -> Nat = {
+    \x: Nat. \y: Nat. x match {
+        case z() => y
+        case s(x1) => s(add(x1, y))
+    }
+}
+
+def times4(x: Nat): Nat = {
+    let xtimes2: Nat = add(x, x) in
+    add(xtimes2, xtimes2)
+}
+
+def times4desugared(x: Nat): Nat = {
+    (\xtimes2: Nat. add(xtimes2, xtimes2))(add(x, x))
+}

@@ -1,0 +1,95 @@
+.output typed
+
+.decl var(x:symbol)
+.decl app(a:symbol,f:symbol,x:symbol)
+.decl lambda(l:symbol,v:symbol,b:symbol)
+.decl case(m:symbol,s:symbol,p:symbol,b:symbol)
+.decl pattern_match_list(p:symbol,a:symbol,b:symbol)
+
+.decl type(t:symbol)
+.decl typed(x:symbol,t:symbol)
+.decl fun(f:symbol,a:symbol,b:symbol)
+.decl type_eq(a:symbol,b:symbol) 
+
+typed(X,T) :- lambda(X,V,B), typed(V,Tv), typed(B,Tb), fun(Tfn,Tv1,Tb1), type_eq(T, Tfn), type_eq(Tv,Tv1), type_eq(Tb,Tb1).
+typed(X,T) :- app(X,E1,E2), typed(E1,Te), fun(Te1,T1,T), typed(E2,T11), type_eq(Te,Te1), type_eq(T1,T11).
+typed(X,T) :- case(X,S,P,B), typed(S,T1), typed(P,T11), typed(B,T), type_eq(T1,T11).
+typed(X,T) :- pattern_match_list(X,E1,E2), typed(E1,T), typed(E2,T1), type_eq(T,T1).
+
+fun(X,Tv,Tb) :- lambda(X,V,B), typed(V,Tv), typed(B,Tb).
+
+type(T) :- fun(T,T1,T2), type(T1), type(T2).
+
+type_eq(T,U) :- type(T), T=U.
+type_eq(T,U) :- type_eq(U,T).
+type_eq(T,U) :- type_eq(T,S), type_eq(S,U).
+type_eq(T,U) :- fun(T,T1,T2), fun(U,U1,U2), type_eq(T1,U1), type_eq(T2,U2).
+
+type(bool0).
+typed(true4,bool0).
+typed(false5,bool0).
+
+typed(E,bool0) :- true4(E).
+typed(E,bool0) :- false5(E).
+
+type(nat1).
+typed(z6,nat1).
+fun(tfn0,nat1,nat1).
+typed(s7,tfn0).
+
+typed(E,nat1) :- z6(E).
+typed(E,nat1) :- s7(E,A0), typed(A0,nat1).
+
+type_constr(X,nat1) :- s7(E,X).
+
+
+var(_x36).
+typed(_x36,bool0).
+lambda(_id15,_x36,_x36).
+fun(tfn61,bool0,bool0).
+typed(_id15_ascribed,tfn61).
+
+app(app64,_plus217_ascribed,_y37).
+app(app62,s7,app64).
+var(_y37).
+typed(_y37,nat1).
+lambda(_callsPlus216,_y37,app62).
+fun(tfn67,nat1,nat1).
+typed(_callsPlus216_ascribed,tfn67).
+
+app(app70,s7,_x38).
+app(app68,s7,app70).
+var(_x38).
+typed(_x38,nat1).
+lambda(_plus217,_x38,app68).
+fun(tfn73,nat1,nat1).
+typed(_plus217_ascribed,tfn73).
+
+app(app74,s7,_x39).
+var(_x39).
+typed(_x39,nat1).
+lambda(_plus118,_x39,app74).
+fun(tfn77,nat1,nat1).
+typed(_plus118_ascribed,tfn77).
+
+app(app78,s7,_number120_ascribed).
+var(_z40).
+typed(_z40,nat1).
+lambda(_usesNumber119,_z40,app78).
+fun(tfn81,nat1,nat1).
+typed(_usesNumber119_ascribed,tfn81).
+
+app(app86,_inf21_ascribed,_x41).
+app(app84,s7,app86).
+var(_x41).
+typed(_x41,nat1).
+lambda(_inf21,_x41,app84).
+fun(tfn89,nat1,nat1).
+typed(_inf21_ascribed,tfn89).
+
+app(app90,_rec22_ascribed,_x42).
+var(_x42).
+typed(_x42,nat1).
+lambda(_rec22,_x42,app90).
+fun(tfn93,nat1,nat1).
+typed(_rec22_ascribed,tfn93).

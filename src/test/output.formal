@@ -1,0 +1,98 @@
+#lang datalog
+
+typed(X,T) :- lambda(X,V,B), typed(V,Tv), typed(B,Tb), fun(Tfn,Tv1,Tb1), type_eq(T, Tfn), type_eq(Tv,Tv1), type_eq(Tb,Tb1).
+typed(X,T) :- app(X,E1,E2), typed(E1,Te), fun(Te1,T1,T), typed(E2,T11), type_eq(Te,Te1), type_eq(T1,T11).
+typed(X,T) :- match(X,S,P,B), typed(S,T1), typed(P,T11), typed(B,T), type_eq(T1,T11).
+typed(X,T) :- pattern_match_list(X,E1,E2), typed(E1,T), typed(E2,T1), type_eq(T,T1).
+
+fun(X,Tv,Tb) :- lambda(X,V,B), typed(V,Tv), typed(B,Tb).
+
+type(T) :- fun(T,T1,T2), type(T1), type(T2).
+
+type_eq(T,U) :- type(T), T=U.
+type_eq(T,U) :- type_eq(U,T).
+type_eq(T,U) :- type_eq(T,S), type_eq(S,U).
+type_eq(T,U) :- fun(T,T1,T2), fun(U,U1,U2), type_eq(T1,U1), type_eq(T2,U2).
+
+type(_Nat0).
+typed(_z1,_Nat0).
+fun(tfn0,_Nat0,_Nat0).
+typed(_s2,tfn0).
+
+typed(E,_Nat0) :- _z1(E).
+typed(E,_Nat0) :- _s2(E,A0), typed(A0,_Nat0).
+
+type_constr(X,_Nat0) :- _s2(E,X).
+
+_z1(pat_conspat4).
+match(v5,_x7,pat_conspat4,_y8).
+var(_x19).
+typed(_x19,T) :- type_constr(_x19,T).
+_s2(pat_conspat6,_x19).
+match(app7,_x7,pat_conspat6,app7).
+app(app10,_plus3_ascribed,_x19).
+app(app9,app10,_y8).
+app(app7,_s2,app9).
+pattern_match_list(ls_v5,app7,v5).
+var(_y8).
+typed(_y8,_Nat0).
+lambda(lbd1,_y8,ls_v5).
+var(_x7).
+typed(_x7,_Nat0).
+lambda(_plus3,_x7,lbd1).
+fun(tfn14,_Nat0,_Nat0).
+fun(tfn15,_Nat0,tfn14).
+typed(_plus3_ascribed,tfn15).
+
+_z1(pat_conspat19).
+match(v20,_x10,pat_conspat19,_y11).
+var(_x112).
+typed(_x112,T) :- type_constr(_x112,T).
+_s2(pat_conspat21,_x112).
+match(app22,_x10,pat_conspat21,app22).
+app(app25,_add4_ascribed,_x112).
+app(app24,app25,_y11).
+app(app22,_s2,app24).
+pattern_match_list(ls_v20,app22,v20).
+var(_y11).
+typed(_y11,_Nat0).
+lambda(lbd16,_y11,ls_v20).
+var(_x10).
+typed(_x10,_Nat0).
+lambda(_add4,_x10,lbd16).
+fun(tfn29,_Nat0,_Nat0).
+fun(tfn30,_Nat0,tfn29).
+typed(_add4_ascribed,tfn30).
+
+app(app34,_add4_ascribed,_xtimes214).
+app(app33,app34,_xtimes214).
+var(_xtimes214).
+typed(_xtimes214,_Nat0).
+lambda(lbd32,_xtimes214,app33).
+app(app39,_add4_ascribed,_x13).
+app(app38,app39,_x13).
+app(app31,lbd32,app38).
+var(_x13).
+typed(_x13,_Nat0).
+lambda(_times45,_x13,app31).
+fun(tfn43,_Nat0,_Nat0).
+typed(_times45_ascribed,tfn43).
+
+app(app47,_add4_ascribed,_xtimes216).
+app(app46,app47,_xtimes216).
+var(_xtimes216).
+typed(_xtimes216,_Nat0).
+lambda(lbd45,_xtimes216,app46).
+app(app52,_add4_ascribed,_x15).
+app(app51,app52,_x15).
+app(app44,lbd45,app51).
+var(_x15).
+typed(_x15,_Nat0).
+lambda(_times4desugared6,_x15,app44).
+fun(tfn56,_Nat0,_Nat0).
+typed(_times4desugared6_ascribed,tfn56).
+
+typed(_plus3,tfn15)?
+typed(_add4,tfn30)?
+typed(_times45,tfn43)?
+typed(_times4desugared6,tfn56)?

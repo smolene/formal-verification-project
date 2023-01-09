@@ -1,0 +1,32 @@
+type Nat {
+  case z()
+  case s(Nat)
+}
+
+def czero(f: Nat -> Nat, x: Nat): Nat = {
+    x
+}
+
+def csucc(
+    n: (Nat -> Nat) -> Nat -> Nat, 
+    f: Nat -> Nat, 
+    x: Nat
+): Nat = 
+{
+    (n(f))(f(x))
+}
+
+def test(f: Nat -> Nat, x: Nat): Nat = {
+    let n: (Nat -> Nat) -> Nat -> Nat = csucc(czero) in
+    n(f, x)
+}
+
+def cadd(
+    a: (Nat -> Nat) -> Nat -> Nat, 
+    b: (Nat -> Nat) -> Nat -> Nat,
+    f: Nat -> Nat,
+    x: Nat,
+): Nat = 
+{
+    (a(f))(b(f, x))
+}

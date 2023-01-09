@@ -1,0 +1,15 @@
+#lang datalog
+
+typed(X,T) :- lambda(X,V,B), typed(V,Tv), typed(B,Tb), fun(Tfn,Tv1,Tb1), type_eq(T, Tfn), type_eq(Tv,Tv1), type_eq(Tb,Tb1).
+typed(X,T) :- app(X,E1,E2), typed(E1,Te), fun(Te1,T1,T), typed(E2,T11), type_eq(Te,Te1), type_eq(T1,T11).
+typed(X,T) :- match(X,S,P,B), typed(S,T1), typed(P,T11), typed(B,T), type_eq(T1,T11).
+typed(X,T) :- pattern_match_list(X,E1,E2), typed(E1,T), typed(E2,T1), type_eq(T,T1).
+
+fun(X,Tv,Tb) :- lambda(X,V,B), typed(V,Tv), typed(B,Tb).
+
+type(T) :- fun(T,T1,T2), type(T1), type(T2).
+
+type_eq(T,U) :- type(T), T=U.
+type_eq(T,U) :- type_eq(U,T).
+type_eq(T,U) :- type_eq(T,S), type_eq(S,U).
+type_eq(T,U) :- fun(T,T1,T2), fun(U,U1,U2), type_eq(T1,U1), type_eq(T2,U2).

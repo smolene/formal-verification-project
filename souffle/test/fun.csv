@@ -1,0 +1,4 @@
+NatNat	Nat	Nat
+NatBool	Nat	Bool
+BoolNat	Bool	Nat
+BoolBool	Bool	Bool

@@ -1,0 +1,46 @@
+.decl var(x:symbol)
+.decl app(x:symbol,f:symbol,e:symbol)
+.decl lambda(l:symbol,v:symbol,b:symbol)
+
+.decl fun(f:symbol,a:symbol,b:symbol)
+.decl type(t:symbol)
+.decl typed(x:symbol,t:symbol)
+
+fun(
+    cat(
+        "(",
+        cat(
+            cat(A,"->"),
+            cat(B,")")
+        )
+    ),
+    A,
+    B
+) :- type(A), type(B).
+
+type(F) :- type(A), type(B), fun(F,A,B).
+
+typed(X,T) :-
+    lambda(X,V,B),
+    typed(V,Tv), typed(B,Tb),
+    fun(T,Tv,Tb).
+
+typed(X,T) :-
+    app(X,F,E),
+    typed(F,Tf), typed(E,Te),
+    fun(Tf,Te,T).
+
+type("Nat").
+type("Bool").
+
+var("x").
+typed("x","Bool").
+var("v").
+typed("v","Nat").
+lambda("f","v","x").
+var("y").
+typed("y","Nat").
+app("app1","f","y").
+
+.output typed(IO=stdout)
+.limitsize fun(n=400)

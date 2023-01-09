@@ -1,0 +1,88 @@
+// parsing tests
+
+// comments work by magic(tm) basically everywhere
+/* this kind too ! */
+
+type Bool {
+  case true()
+  case false()
+}
+
+def not(b: Bool): Bool = {
+  b match {
+    case true() => false()
+    case false() => true()
+  }
+}
+
+def and(l: Bool, r: Bool): Bool = {
+  l match {
+    case true() => r
+    case false() => false()
+  }
+}
+
+def matchinmatch: Bool = {
+  true() match {
+    case _ => false()
+  } match {
+    case _ => true()
+  }
+}
+
+def main: Bool = {
+  not(and(not(False), not(True)))
+}
+
+type List[A] {
+  case nil()
+  case cons(A, List[A])
+}
+
+def map[T, U](f: T -> U, ls: List[T]): List[U] = {
+  ls match {
+    case nil() => nil[A]()
+    case cons(h, t) => cons[A](f(h), map[T, U](f, t))
+  }
+}
+
+type Nat {
+  case z()
+  case s(Nat)
+}
+
+def useMap(ls: List[Bool]): List[Nat] = {
+  map(\b: Bool. b match {
+    case true() => s(z())
+    case false() => z()
+  }, ls)
+}
+
+type Unit {
+  case unit()
+}
+
+def nested = {
+  unit() match {
+    case unit() => unit() match {
+      case unit() => unit()
+    }
+  }
+}
+
+def foldLeft[T, U](z: U, f: U -> T -> U, ls: List[T]): U = {
+  ls match {
+    case nil() => z
+    case cons(h, t) => foldLeft(f(z, h), f, t)
+  }
+}
+
+def withLet(u: Unit): Unit = {
+  let x = unit() in
+  let y = unit() in
+  x match {
+    case unit() => y match {
+      case v => v
+    }
+  }
+}

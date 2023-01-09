@@ -1,0 +1,47 @@
+.decl var(x:symbol)
+.input var
+.decl app(a:symbol,f:symbol,x:symbol)
+.input app
+.decl lambda(l:symbol,v:symbol,b:symbol)
+.decl case(m:symbol,s:symbol,p:symbol,b:symbol)
+.decl pattern_match_list(p:symbol,a:symbol,b:symbol)
+
+.decl type(t:symbol)
+.decl typed(x:symbol,t:symbol)
+.output typed
+.decl fun(f:symbol,a:symbol,b:symbol)
+.decl type_eq(a:symbol,b:symbol) eqrel
+
+type(T) :- fun(T,A,B), type(A), type(B).
+
+typed(X,T) :- 
+    lambda(X,V,B), 
+    typed(V,Tv), typed(B,Tb), 
+    fun(T_,Tv_,Tb_), 
+    type_eq(T, T_), type_eq(Tv,Tv_), type_eq(Tb,Tb_).
+
+typed(X,T) :- 
+    app(X,F,E), 
+    typed(F,Tf), typed(E,Te),
+    fun(Tf_,Te_,T), 
+    type_eq(Tf,Tf_), type_eq(Te,Te_).
+
+typed(X,T) :- 
+    case(X,S,P,B), 
+    typed(S,Ts), typed(P,Tp), typed(B,T), 
+    type_eq(Ts,Tp).
+
+typed(X,T) :- 
+    pattern_match_list(X,A,B), 
+    typed(A,T), typed(B,Tb), 
+    type_eq(T,Tb).
+
+fun(X,Tv,Tb) :- 
+    lambda(X,V,B), typed(V,Tv), typed(B,Tb).
+
+type_eq(T,T) :- type(T).
+
+type_eq(T,U) :- 
+    fun(T,Ta,Tb), fun(U,Ua,Ub), 
+    type_eq(Ta,Ua), type_eq(Tb,Ub).
+

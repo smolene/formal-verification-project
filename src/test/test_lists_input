@@ -1,0 +1,76 @@
+// type definitions: booleans, natural numbers, and lists
+// in test_lists, this is translated after the header, lines 33-49.
+
+type Bool{
+    case true()
+    case false()
+}
+
+type Nat {
+    case z()
+    case succ(Nat)
+}
+
+type List[A] {
+    case nil()
+    case cons(A, List[A])
+}
+
+// in tests_lists, a few basic types are generated lines 53-58
+// generating the data types encountered in the program is the main limitation of our approach currently
+
+// a few constant definitions
+// in test_lists, this is translated lines 62-73
+def one : Nat = {succ(z())}
+def false_true_nil : List[Bool] = {cons(false(),cons(true(),nil()))}
+def one_zero_nil : List[Nat] = {cons(one,cons(z(),nil()))}
+
+// The map function, using polymorphism and generic types T and U
+// In test_lists, this is translated lines 78-109
+// Its type is forall U, forall T, (T->U) -> List[T] -> List[U]
+// The types of various sub-expression are queried lines 167-178, the type of the function is queried line 179
+
+def map[T, U](f: T -> U, ls: List[T]): List[U] = {
+    ls match {
+        case nil() => nil()
+        case cons(h, t) => cons(f(h), map[T, U](f, t))
+    }
+}
+
+// The type of the map function is correct, but polymorphic. Now, we would like to check that it is still correct when we apply map 
+// We make a first test where T=Bool and U=Nat, followed by a second test where T=Nat and U=Bool
+// We check that Datalog finds the correct type for the result (and only the correct type)
+
+// Let's first define a function f1: Bool->Nat
+// Corresponds to lines 113-118 in test_lists
+def f1(x: Bool) : Nat = {
+    x match {
+        case true() => z()
+        case false() => one
+    }
+}
+
+// Call map on f1 and a list of Booleans
+// Corresponds to lines 121-124 in test_lists
+// The type of the result is queried line 185 in test_lists
+def app_map_bool_nat() : List[Nat] = {
+    map(f1,false_true_nil)
+}
+
+// Make the same test with a function f2:Nat->Bool and a list of Booleans
+// Corresponds to  lines 138-146 in test_lists
+def f2(y:Nat) : Bool = {
+    y match {
+        case succ(k) => true()
+        case z() => false()
+    }
+}
+
+// Corresponds to lines 149-152 in test_lists
+// The type of the result is queried line 192 in test_lists
+def app_map_nat_bool() : List[Bool] = {
+    map(f2,one_zero_nil)
+}
+
+// In test_lists, for these expressions to typecheck, we need to introduce several intermediate types
+// This is done lines 126-132 and 154-160 and this is an illustration of the limitations of this approach
